@@ -6,14 +6,8 @@ import joblib
 app = Flask(__name__)
 CORS(app)
 
-# Load the full pipeline (preprocessing + model)
-parts = [f"model_part{i}.bin" for i in range(5)]  # adjust number of parts
-with open("model.joblib", "wb") as f:
-    for part in parts:
-        with open(part, "rb") as pf:
-            f.write(pf)
 
-import joblib
+
 pipeline = joblib.load("model.joblib")  # Make sure this pipeline was trained with all 16 features
 
 @app.route("/")
