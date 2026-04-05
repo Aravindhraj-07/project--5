@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LoanIQ — Smart Loan Predictor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink: #0f0e0c;
+      --paper: #f5f2ec;
+      --cream: #ede9e0;
+      --gold: #b8860b;
+      --gold-light: #d4a017;
+      --green: #1a6b3a;
+      --green-light: #22883e;
+      --red: #8b1a1a;
+      --muted: #7a7468;
+      --border: #ccc8be;
+      --card: #ffffff;
+      --serif: 'DM Serif Display', Georgia, serif;
+      --sans: 'DM Sans', system-ui, sans-serif;
+    }
+
+    body {
+      font-family: var(--sans);
+      background-color: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(circle, #b8a99088 1px, transparent 1px);
+      background-size: 28px 28px;
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    header {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem 3rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--paper);
+    }
+
+    .logo {
+      font-family: var(--serif);
+      font-size: 1.6rem;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+    }
+
+    .logo span { color: var(--gold); font-style: italic; }
+
+    .badge {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .hero {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 4rem 2rem 2.5rem;
+    }
+
+    .hero h1 {
+      font-family: var(--serif);
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      line-height: 1.1;
+      color: var(--ink);
+      margin-bottom: 1rem;
+    }
+
+    .hero h1 em { color: var(--gold); }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 1rem;
+      font-weight: 300;
+      max-width: 420px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    .layout {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 2rem;
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 0 2rem 4rem;
+      width: 100%;
+    }
+
+    .form-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem;
+    }
+
+    .section-title {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      color: var(--ink);
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--cream);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title .num {
+      width: 22px;
+      height: 22px;
+      background: var(--ink);
+      color: white;
+      border-radius: 50%;
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 1.75rem; }
+
+    .field { display: flex; flex-direction: column; gap: 5px; }
+
+    label {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px 13px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 0.9rem;
+      font-weight: 400;
+      transition: border-color 0.2s, background 0.2s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--gold);
+      background: #fff;
+    }
+
+    input::placeholder { color: #bbb8b0; }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237a7468'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 30px;
+      cursor: pointer;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: var(--ink);
+      color: white;
+      font-family: var(--sans);
+      font-size: 0.9rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 0.5rem;
+    }
+
+    .submit-btn:hover { background: #2a2820; }
+    .submit-btn:active { transform: scale(0.99); }
+    .submit-btn:disabled { background: var(--muted); cursor: not-allowed; }
+
+    .sidebar { display: flex; flex-direction: column; gap: 1.25rem; }
+
+    .result-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      min-height: 220px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.4s ease;
+    }
+
+    .result-card.idle .result-icon { font-size: 2.5rem; opacity: 0.15; margin-bottom: 1rem; }
+    .result-card.idle p { color: var(--muted); font-size: 0.85rem; line-height: 1.6; }
+
+    .result-card.loading .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid var(--cream);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 1rem;
+    }
+
+    .result-card.loading p { color: var(--muted); font-size: 0.85rem; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .result-card.approved { border-color: #a8d5b5; background: #f0faf3; }
+    .result-card.rejected { border-color: #e8b4b4; background: #fdf5f5; }
+
+    .result-verdict { font-family: var(--serif); font-size: 1.6rem; margin-bottom: 0.4rem; }
+    .result-verdict.approved-text { color: var(--green); }
+    .result-verdict.rejected-text { color: var(--red); }
+    .result-emoji { font-size: 2.8rem; margin-bottom: 0.75rem; }
+
+    .confidence-bar-wrap { width: 100%; margin-top: 1rem; }
+
+    .confidence-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-bottom: 5px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .confidence-track { height: 6px; background: var(--cream); border-radius: 99px; overflow: hidden; }
+
+    .confidence-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .confidence-fill.approved-fill { background: var(--green-light); }
+    .confidence-fill.rejected-fill { background: var(--red); }
+
+    .info-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+
+    .info-card h3 { font-family: var(--serif); font-size: 1rem; margin-bottom: 1rem; color: var(--ink); }
+
+    .factor-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--cream);
+      font-size: 0.82rem;
+    }
+
+    .factor-row:last-child { border-bottom: none; }
+
+    .factor-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .factor-dot.high { background: var(--green-light); }
+    .factor-dot.medium { background: var(--gold-light); }
+    .factor-dot.low { background: var(--muted); }
+
+    .factor-name { flex: 1; color: var(--ink); }
+    .factor-weight { color: var(--muted); font-size: 0.75rem; }
+
+    /* === FOOTER === */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      background: var(--paper);
+      padding: 2rem 3rem;
+    }
+
+    .footer-inner {
+      max-width: 1060px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .footer-credit {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .footer-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--ink);
+      color: white;
+      font-family: var(--serif);
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .footer-name {
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    .footer-name span {
+      font-weight: 400;
+      color: var(--muted);
+    }
+
+    .footer-club {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: var(--cream);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    .linkedin-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 16px;
+      border: 1px solid #0077b5;
+      border-radius: 20px;
+      color: #0077b5;
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .linkedin-btn:hover { background: #0077b5; color: white; }
+
+    .linkedin-btn svg { width: 14px; height: 14px; fill: currentColor; }
+
+    .footer-disclaimer {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-card, .result-card, .info-card { animation: fadeSlideUp 0.5s ease both; }
+    .result-card { animation-delay: 0.1s; }
+    .info-card { animation-delay: 0.2s; }
+
+    @media (max-width: 780px) {
+      header { padding: 1.2rem 1.5rem; }
+      .layout { grid-template-columns: 1fr; padding: 0 1rem 3rem; }
+      .grid-2 { grid-template-columns: 1fr; }
+      footer { padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">Loan<span>IQ</span></div>
+    <div class="badge">ML-Powered Predictor</div>
+  </header>
+
+  <div class="hero">
+    <h1>Will your loan<br>get <em>approved?</em></h1>
+    <p>Enter your financial details below and our machine learning model will predict your loan outcome instantly.</p>
+  </div>
+
+  <div class="layout">
+
+    <div class="form-card">
+
+      <div class="section-title"><span class="num">1</span> Loan Details</div>
+      <div class="grid-2">
+        <div class="field">
+          <label>Loan Amount</label>
+          <input id="loan_amount" type="number" placeholder="e.g. 50000">
+        </div>
+        <div class="field">
+          <label>Term</label>
+          <select id="term">
+            <option value="Short Term">Short Term</option>
+            <option value="Long Term">Long Term</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Purpose</label>
+          <select id="purpose">
+            <option value="Debt Consolidation">Debt Consolidation</option>
+            <option value="Home Improvements">Home Improvements</option>
+            <option value="Business Loan">Business Loan</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Home Ownership</label>
+          <select id="home">
+            <option value="Rent">Rent</option>
+            <option value="Own Home">Own Home</option>
+            <option value="Home Mortgage">Home Mortgage</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section-title"><span class="num">2</span> Income & Employment</div>
+      <div class="grid-2">
+        <div class="field">
+          <label>Annual Income</label>
+          <input id="income" type="number" placeholder="e.g. 85000">
+        </div>
+        <div class="field">
+          <label>Other Income</label>
+          <input id="other_income" type="number" placeholder="e.g. 5000">
+        </div>
+        <div class="field">
+          <label>Monthly Debt</label>
+          <input id="debt" type="number" placeholder="e.g. 1200">
+        </div>
+        <div class="field">
+          <label>Years in Current Job</label>
+          <input id="years_job" type="number" placeholder="e.g. 5">
+        </div>
+      </div>
+
+      <div class="section-title"><span class="num">3</span> Credit Profile</div>
+      <div class="grid-2">
+        <div class="field">
+          <label>Credit Score</label>
+          <input id="credit_score" type="number" placeholder="300 – 850">
+        </div>
+        <div class="field">
+          <label>Years of Credit History</label>
+          <input id="credit_years" type="number" placeholder="e.g. 10">
+        </div>
+        <div class="field">
+          <label>Current Credit Balance</label>
+          <input id="credit_balance" type="number" placeholder="e.g. 8000">
+        </div>
+        <div class="field">
+          <label>Maximum Open Credit</label>
+          <input id="max_credit" type="number" placeholder="e.g. 30000">
+        </div>
+        <div class="field">
+          <label>Open Accounts</label>
+          <input id="accounts" type="number" placeholder="e.g. 6">
+        </div>
+        <div class="field">
+          <label>Credit Problems</label>
+          <input id="credit_problems" type="number" placeholder="e.g. 0">
+        </div>
+        <div class="field">
+          <label>Bankruptcies</label>
+          <input id="bankruptcies" type="number" placeholder="e.g. 0">
+        </div>
+        <div class="field">
+          <label>Tax Liens</label>
+          <input id="tax_liens" type="number" placeholder="e.g. 0">
+        </div>
+      </div>
+
+      <button class="submit-btn" id="submit-btn" onclick="predict()">Analyse My Application →</button>
+    </div>
+
+    <div class="sidebar">
+
+      <div class="result-card idle" id="result-card">
+        <div class="result-icon">📋</div>
+        <p>Fill in your financial details and click <strong>Analyse</strong> to see your loan prediction.</p>
+      </div>
+
+      <div class="info-card">
+        <h3>Key Decision Factors</h3>
+        <div class="factor-row">
+          <div class="factor-dot high"></div>
+          <span class="factor-name">Credit Score</span>
+          <span class="factor-weight">High impact</span>
+        </div>
+        <div class="factor-row">
+          <div class="factor-dot high"></div>
+          <span class="factor-name">Annual Income</span>
+          <span class="factor-weight">High impact</span>
+        </div>
+        <div class="factor-row">
+          <div class="factor-dot high"></div>
+          <span class="factor-name">Debt-to-Income Ratio</span>
+          <span class="factor-weight">High impact</span>
+        </div>
+        <div class="factor-row">
+          <div class="factor-dot medium"></div>
+          <span class="factor-name">Credit History Length</span>
+          <span class="factor-weight">Medium impact</span>
+        </div>
+        <div class="factor-row">
+          <div class="factor-dot medium"></div>
+          <span class="factor-name">Bankruptcies / Liens</span>
+          <span class="factor-weight">Medium impact</span>
+        </div>
+        <div class="factor-row">
+          <div class="factor-dot low"></div>
+          <span class="factor-name">Loan Purpose</span>
+          <span class="factor-weight">Lower impact</span>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <h3>Quick Tips</h3>
+        <div class="factor-row">
+          <div class="factor-dot high"></div>
+          <span class="factor-name">Credit score above 700 significantly improves approval odds.</span>
+        </div>
+        <div class="factor-row">
+          <div class="factor-dot medium"></div>
+          <span class="factor-name">Keep monthly debt below 35% of monthly income.</span>
+        </div>
+        <div class="factor-row">
+          <div class="factor-dot low"></div>
+          <span class="factor-name">Longer credit history signals reliability to lenders.</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-inner">
+
+      <div class="footer-credit">
+        <div class="footer-avatar">AR</div>
+        <div>
+          <div class="footer-name">Aravindhraj <span>— Created &amp; Maintained by</span></div>
+        </div>
+        <div class="footer-club">Microsoft Club</div>
+        <a class="linkedin-btn" href="https://www.linkedin.com/in/aravindhraj-m-15b029387?utm_source=share_via&utm_content=profile&utm_medium=member_android_app" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+          </svg>
+          Connect on LinkedIn
+        </a>
+      </div>
+
+      <div class="footer-disclaimer">
+        LoanIQ — Predictions are for informational purposes only and do not constitute financial advice.
+      </div>
+
+    </div>
+  </footer>
+
+  <script>
+    async function predict() {
+      const btn = document.getElementById('submit-btn');
+      const card = document.getElementById('result-card');
+
+      btn.disabled = true;
+      btn.textContent = 'Analysing…';
+
+      card.className = 'result-card loading';
+      card.innerHTML = `<div class="spinner"></div><p>Running prediction model…</p>`;
+
+      const data = {
+        loan_amount: document.getElementById("loan_amount").value,
+        term: document.getElementById("term").value,
+        credit_score: document.getElementById("credit_score").value,
+        income: document.getElementById("income").value,
+        years_job: document.getElementById("years_job").value,
+        home: document.getElementById("home").value,
+        purpose: document.getElementById("purpose").value,
+        debt: document.getElementById("debt").value,
+        credit_balance: document.getElementById("credit_balance").value,
+        accounts: document.getElementById("accounts").value,
+        max_credit: document.getElementById("max_credit").value,
+        tax_liens: document.getElementById("tax_liens").value,
+        bankruptcies: document.getElementById("bankruptcies").value,
+        credit_problems: document.getElementById("credit_problems").value,
+        credit_years: document.getElementById("credit_years").value,
+        other_income: document.getElementById("other_income").value
+      };
+
+      try {
+        const res = await fetch("https://project-4-bq5h.onrender.com/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+
+        const result = await res.json();
+
+        if (result.error) {
+          card.className = 'result-card rejected';
+          card.innerHTML = `
+            <div class="result-emoji">⚠️</div>
+            <div class="result-verdict rejected-text">Error</div>
+            <p style="font-size:0.82rem;color:#8b1a1a;margin-top:0.5rem">${result.error}</p>
+          `;
+        } else {
+          const pct = (result.probability * 100).toFixed(1);
+          if (result.prediction === 1) {
+            card.className = 'result-card approved';
+            card.innerHTML = `
+              <div class="result-emoji">✅</div>
+              <div class="result-verdict approved-text">Likely Approved</div>
+              <p style="font-size:0.82rem;color:#1a6b3a;margin-top:0.3rem">Our model predicts approval</p>
+              <div class="confidence-bar-wrap">
+                <div class="confidence-label"><span>Confidence</span><span>${pct}%</span></div>
+                <div class="confidence-track"><div class="confidence-fill approved-fill" style="width:0%" id="cf"></div></div>
+              </div>
+            `;
+          } else {
+            card.className = 'result-card rejected';
+            card.innerHTML = `
+              <div class="result-emoji">❌</div>
+              <div class="result-verdict rejected-text">Likely Rejected</div>
+              <p style="font-size:0.82rem;color:#8b1a1a;margin-top:0.3rem">Our model predicts rejection</p>
+              <div class="confidence-bar-wrap">
+                <div class="confidence-label"><span>Confidence</span><span>${pct}%</span></div>
+                <div class="confidence-track"><div class="confidence-fill rejected-fill" style="width:0%" id="cf"></div></div>
+              </div>
+            `;
+          }
+          setTimeout(() => {
+            const fill = document.getElementById('cf');
+            if (fill) fill.style.width = pct + '%';
+          }, 80);
+        }
+
+      } catch (err) {
+        card.className = 'result-card rejected';
+        card.innerHTML = `
+          <div class="result-emoji">🔌</div>
+          <div class="result-verdict rejected-text">Server Error</div>
+          <p style="font-size:0.82rem;color:#8b1a1a;margin-top:0.5rem">Could not reach the prediction server. Please try again.</p>
+        `;
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Analyse My Application →';
+    }
+  </script>
+
+</body>
+</html>
