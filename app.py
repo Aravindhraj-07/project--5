@@ -1,55 +1,46 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import pandas as pd
+from flask import Flask, render_template, request
 import joblib
+import numpy as np
 
 app = Flask(__name__)
-CORS(app)
 
+# Load the trained pipeline
+pipeline = joblib.load("model.joblib")
 
-
-pipeline = joblib.load("model.joblib")  # Make sure this pipeline was trained with all 16 features
-
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def home():
-    return "Loan Prediction API is running"
+    prediction = None
+    if request.method == "POST":
+        try:
+            # Collect form inputs
+            data = request.form
+            features = [[
+                float(data['loan_amount']),
+                data['term'],
+                data['purpose'],
+                data['home_ownership'],
+                float(data['annual_income']),
+                float(data['other_income']),
+                float(data['monthly_debt']),
+                float(data['years_in_current_job']),
+                float(data['credit_score']),
+                float(data['years_of_credit_history']),
+                float(data['current_credit_balance']),
+                float(data['maximum_open_credit']),
+                float(data['open_accounts']),
+                float(data['credit_problems']),
+                float(data['bankruptcies']),
+                float(data['tax_liens'])
+            ]]
 
-@app.route("/predict", methods=["POST"])
-def predict():
-    try:
-        data = request.get_json()
+            # Make prediction
+            pred = pipeline.predict(features)[0]
+            prob = pipeline.predict_proba(features)[0][1]  # probability for 1
+            prediction = f"Loan Status: {pred} (Probability of Fully Paid: {prob:.2f})"
+        except Exception as e:
+            prediction = f"Error: {str(e)}"
 
-        # Create dataframe with all 16 features
-        input_data = pd.DataFrame([{
-            "Current Loan Amount": float(data["loan_amount"]),
-            "Term": data["term"],
-            "Credit Score": float(data["credit_score"]),
-            "Annual Income": float(data["income"]),
-            "Years in current job": int(data["years_job"]),
-            "Home Ownership": data["home"],
-            "Purpose": data["purpose"],
-            "Monthly Debt": float(data["debt"]),
-            "Current Credit Balance": float(data["credit_balance"]),
-            "Number of Open Accounts": int(data["accounts"]),
-            "Maximum Open Credit": float(data["max_credit"]),
-            "Tax Liens": int(data["tax_liens"]),
-            "Bankruptcies": int(data["bankruptcies"]),
-            "Number of Credit Problems": int(data["credit_problems"]),
-            "Years of Credit History": float(data["credit_years"]),
-            "Other Income": float(data["other_income"])
-        }])
-
-        # Predict
-        prediction = pipeline.predict(input_data)[0]
-        probability = pipeline.predict_proba(input_data)[0][1]
-
-        return jsonify({
-            "prediction": int(prediction),
-            "probability": float(probability)
-        })
-
-    except Exception as e:
-        return jsonify({"error": str(e)})
+    return render_template("index.html", prediction=prediction)
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host="0.0.0.0", port=5000)
