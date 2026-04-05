@@ -1,46 +1,55 @@
-from flask import Flask, render_template, request
+from flask import Flask, request, jsonify
 import joblib
 import numpy as np
 
 app = Flask(__name__)
 
-# Load the trained pipeline
-pipeline = joblib.load("model.joblib")
+# Load your trained pipeline (make sure it includes preprocessing for categorical features)
+model = joblib.load("model.joblib")
 
-@app.route("/", methods=["GET", "POST"])
+@app.route('/')
 def home():
-    prediction = None
-    if request.method == "POST":
-        try:
-            # Collect form inputs
-            data = request.form
-            features = [[
-                float(data['loan_amount']),
-                data['term'],
-                data['purpose'],
-                data['home_ownership'],
-                float(data['annual_income']),
-                float(data['other_income']),
-                float(data['monthly_debt']),
-                float(data['years_in_current_job']),
-                float(data['credit_score']),
-                float(data['years_of_credit_history']),
-                float(data['current_credit_balance']),
-                float(data['maximum_open_credit']),
-                float(data['open_accounts']),
-                float(data['credit_problems']),
-                float(data['bankruptcies']),
-                float(data['tax_liens'])
-            ]]
+    return "API is running. Use POST /predict to get predictions."
 
-            # Make prediction
-            pred = pipeline.predict(features)[0]
-            prob = pipeline.predict_proba(features)[0][1]  # probability for 1
-            prediction = f"Loan Status: {pred} (Probability of Fully Paid: {prob:.2f})"
-        except Exception as e:
-            prediction = f"Error: {str(e)}"
+@app.route('/predict', methods=['POST'])
+def predict():
+    try:
+        data = request.get_json()
 
-    return render_template("index.html", prediction=prediction)
+        # Extract features from the request
+        features = [
+            float(data['loan_amount']),
+            data['term'],
+            data['purpose'],
+            data['home'],
+            float(data['income']),
+            float(data['other_income']),
+            float(data['debt']),
+            float(data['years_job']),
+            float(data['credit_score']),
+            float(data['credit_years']),
+            float(data['credit_balance']),
+            float(data['max_credit']),
+            float(data['accounts']),
+            float(data['credit_problems']),
+            float(data['bankruptcies']),
+            float(data['tax_liens'])
+        ]
+
+        # Convert to NumPy 2D array for the model
+        features = np.array([features])
+
+        # Predict
+        prediction = model.predict(features)[0]
+        probability = model.predict_proba(features)[0][prediction]  # Probability of predicted class
+
+        return jsonify({
+            "prediction": int(prediction),  # 0 or 1
+            "probability": float(probability)
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)})
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(debug=True)
