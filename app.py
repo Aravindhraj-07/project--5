@@ -7,7 +7,11 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-model = joblib.load("model.joblib")
+# Load model pipeline and the tuned decision threshold
+model     = joblib.load("model.joblib")
+threshold = joblib.load("threshold.joblib")   # e.g. 0.43 — tuned for best precision
+
+print(f"Model loaded. Decision threshold: {threshold:.2f}")
 
 @app.route('/')
 def home():
@@ -18,7 +22,7 @@ def predict():
     try:
         data = request.get_json()
 
-        # Exact 15 columns in exact training order
+        # Exact 15 column names in exact training order
         input_df = pd.DataFrame([{
             "Current Loan Amount":       float(data["loan_amount"]),
             "Term":                      data["term"],
@@ -37,12 +41,13 @@ def predict():
             "Tax Liens":                 float(data["tax_liens"]),
         }])
 
-        prediction  = model.predict(input_df)[0]
-        probability = float(model.predict_proba(input_df).max())
+        # Use tuned threshold instead of default 0.5
+        prob       = float(model.predict_proba(input_df)[0][1])
+        prediction = int(prob >= threshold)
 
         return jsonify({
-            "prediction":  int(prediction),
-            "probability": probability
+            "prediction":  prediction,
+            "probability": round(max(prob, 1 - prob), 4)  # confidence of the chosen class
         })
 
     except Exception as e:
